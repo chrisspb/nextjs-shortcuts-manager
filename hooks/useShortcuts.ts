@@ -8,13 +8,18 @@ interface Shortcut {
   description?: string;
 }
 
-export const useShortcuts = () => {
+export const useShortcuts = (userId?: string) => {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchShortcuts = async () => {
     try {
-      const response = await fetch('/api/shortcuts');
+      // Si un userId est fourni, on l'ajoute comme query parameter
+      const url = userId 
+        ? `/api/shortcuts?userId=${userId}`
+        : '/api/shortcuts';
+      
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Erreur lors du chargement des raccourcis');
       const data = await response.json();
       setShortcuts(data);
@@ -31,16 +36,19 @@ export const useShortcuts = () => {
       const response = await fetch('/api/shortcuts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(shortcutData),
+        body: JSON.stringify({
+          ...shortcutData,
+          userId: userId, // On ajoute l'userId si fourni
+        }),
       });
       
-      if (!response.ok) throw new Error('Erreur lors de l\'ajout du raccourci');
+      if (!response.ok) throw new Error('Erreur lors de l\\'ajout du raccourci');
       
       const newShortcut = await response.json();
       setShortcuts([...shortcuts, newShortcut]);
       toast.success('Raccourci ajouté avec succès');
     } catch (error) {
-      toast.error('Impossible d\'ajouter le raccourci');
+      toast.error('Impossible d\\'ajouter le raccourci');
       console.error(error);
     }
   };
@@ -82,7 +90,7 @@ export const useShortcuts = () => {
 
   useEffect(() => {
     fetchShortcuts();
-  }, []);
+  }, [userId]); // Refetch when userId changes
 
   return {
     shortcuts,
