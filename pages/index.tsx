@@ -1,7 +1,6 @@
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '@/components/Layout';
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -10,35 +9,22 @@ export default function Home() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
+    } else if (status === 'authenticated') {
+      if (session.user.role === 'ADMIN') {
+        router.push('/admin');
+      } else {
+        router.push('/dashboard');
+      }
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   if (status === 'loading') {
-    return <div>Chargement...</div>;
-  }
-
-  if (!session) {
-    return null;
-  }
-
-  if (session.user.role === 'ADMIN') {
-    router.push('/admin');
-    return null;
-  }
-
-  return (
-    <Layout>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Mes raccourcis</h2>
-          {/* Liste des raccourcis */}
-        </section>
-        
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Mes PDFs</h2>
-          {/* Liste des PDFs */}
-        </section>
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-xl">Chargement...</div>
       </div>
-    </Layout>
-  );
+    );
+  }
+
+  return null;
 }
