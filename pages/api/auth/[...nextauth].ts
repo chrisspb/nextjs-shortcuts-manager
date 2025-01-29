@@ -1,12 +1,11 @@
-import { NextApiHandler } from 'next';
-import NextAuth from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-const authHandler: NextApiHandler = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -53,31 +52,22 @@ const authHandler: NextApiHandler = NextAuth({
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.id = token.id;
-        session.user.role = token.role;
-        session.user.managedBy = token.managedBy;
+        session.user.id = token.sub;
+        const user = await prisma.user.findUnique({
+          where: { id: token.sub }
+        });
+        session.user.role = user?.role;
+        session.user.managedBy = user?.managedBy;
       }
       return session;
     }
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    error: '/auth/error'
   },
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === 'development',
-  logger: {
-    error(code, ...message) {
-      console.error(code, message);
-    },
-    warn(code, ...message) {
-      console.warn(code, message);
-    },
-    debug(code, ...message) {
-      if (process.env.NODE_ENV === 'development') {
-        console.debug(code, message);
-      }
-    }
-  }
-});
+};
 
-export default authHandler;
+export default authOptions;
