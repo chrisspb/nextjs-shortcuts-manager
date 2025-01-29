@@ -1,18 +1,30 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-hot-toast';
 import Layout from '@/components/Layout';
 import { useShortcuts } from '@/hooks/useShortcuts';
 import { usePdfs } from '@/hooks/usePdfs';
 import ShortcutCard from '@/components/ShortcutCard';
 import PdfCard from '@/components/PdfCard';
+import AddEditShortcutModal from '@/components/AddEditShortcutModal';
+import AddEditPdfModal from '@/components/AddEditPdfModal';
+
+interface Shortcut {
+  id: string;
+  title: string;
+  url: string;
+  description?: string;
+}
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [managedUserEmail, setManagedUserEmail] = useState<string>('');
+  const [isShortcutModalOpen, setIsShortcutModalOpen] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [selectedShortcut, setSelectedShortcut] = useState<Shortcut | null>(null);
   
-  // Récupérer l'ID de l'utilisateur géré depuis le localStorage
   const userId = typeof window !== 'undefined' ? localStorage.getItem('selectedUserId') : null;
   
   const { shortcuts, loading: shortcutsLoading, addShortcut, updateShortcut, deleteShortcut } = useShortcuts(userId || undefined);
@@ -26,7 +38,6 @@ export default function AdminDashboard() {
     }
   }, [status, session, router]);
 
-  // Récupérer les informations de l'utilisateur géré
   useEffect(() => {
     const fetchUserInfo = async () => {
       if (userId) {
@@ -44,6 +55,57 @@ export default function AdminDashboard() {
 
     fetchUserInfo();
   }, [userId]);
+
+  const handleShortcutSubmit = async (data: Omit<Shortcut, 'id'>) => {
+    try {
+      if (selectedShortcut) {
+        await updateShortcut(selectedShortcut.id, data);
+        toast.success('Raccourci modifié avec succès');
+      } else {
+        await addShortcut(data);
+        toast.success('Raccourci ajouté avec succès');
+      }
+      setIsShortcutModalOpen(false);
+      setSelectedShortcut(null);
+    } catch (error) {
+      toast.error(selectedShortcut ? 'Erreur lors de la modification' : 'Erreur lors de l\'ajout');
+    }
+  };
+
+  const handlePdfSubmit = async (formData: FormData) => {
+    try {
+      if (userId) {
+        formData.append('userId', userId);
+      }
+      await addPdf(formData);
+      toast.success('PDF ajouté avec succès');
+      setIsPdfModalOpen(false);
+    } catch (error) {
+      toast.error('Erreur lors de l\'ajout du PDF');
+    }
+  };
+
+  const handleDeleteShortcut = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce raccourci ?')) {
+      try {
+        await deleteShortcut(id);
+        toast.success('Raccourci supprimé avec succès');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
+
+  const handleDeletePdf = async (id: string) => {
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce PDF ?')) {
+      try {
+        await deletePdf(id);
+        toast.success('PDF supprimé avec succès');
+      } catch (error) {
+        toast.error('Erreur lors de la suppression');
+      }
+    }
+  };
 
   if (status === 'loading' || shortcutsLoading || pdfsLoading) {
     return (
@@ -78,7 +140,10 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-semibold">Raccourcis</h2>
               <button 
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                onClick={() => {/* TODO: Ouvrir modale d'ajout de raccourci */}}
+                onClick={() => {
+                  setSelectedShortcut(null);
+                  setIsShortcutModalOpen(true);
+                }}
               >
                 Ajouter un raccourci
               </button>
@@ -93,12 +158,11 @@ export default function AdminDashboard() {
                     key={shortcut.id}
                     {...shortcut}
                     canEdit
-                    onEdit={() => {/* TODO: Ouvrir modale d'édition */}}
-                    onDelete={async () => {
-                      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce raccourci ?')) {
-                        await deleteShortcut(shortcut.id);
-                      }
+                    onEdit={() => {
+                      setSelectedShortcut(shortcut);
+                      setIsShortcutModalOpen(true);
                     }}
+                    onDelete={() => handleDeleteShortcut(shortcut.id)}
                   />
                 ))
               )}
@@ -110,7 +174,7 @@ export default function AdminDashboard() {
               <h2 className="text-xl font-semibold">PDFs</h2>
               <button 
                 className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                onClick={() => {/* TODO: Ouvrir modale d'ajout de PDF */}}
+                onClick={() => setIsPdfModalOpen(true)}
               >
                 Ajouter un PDF
               </button>
@@ -125,17 +189,33 @@ export default function AdminDashboard() {
                     key={pdf.id}
                     {...pdf}
                     canEdit
-                    onDelete={async () => {
-                      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce PDF ?')) {
-                        await deletePdf(pdf.id);
-                      }
-                    }}
+                    onDelete={() => handleDeletePdf(pdf.id)}
                   />
                 ))
               )}
             </div>
           </section>
         </div>
+
+        {isShortcutModalOpen && (
+          <AddEditShortcutModal
+            isOpen={isShortcutModalOpen}
+            onClose={() => {
+              setIsShortcutModalOpen(false);
+              setSelectedShortcut(null);
+            }}
+            onSubmit={handleShortcutSubmit}
+            initialData={selectedShortcut || undefined}
+          />
+        )}
+
+        {isPdfModalOpen && (
+          <AddEditPdfModal
+            isOpen={isPdfModalOpen}
+            onClose={() => setIsPdfModalOpen(false)}
+            onSubmit={handlePdfSubmit}
+          />
+        )}
       </div>
     </Layout>
   );
