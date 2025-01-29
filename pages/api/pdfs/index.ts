@@ -40,22 +40,20 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
+      let userId = session.user.id;
+
       // Si c'est un admin et qu'il demande les PDFs d'un utilisateur spécifique
       if (session.user.role === 'ADMIN' && req.query.userId) {
-        const pdfs = await prisma.pdf.findMany({
-          where: {
-            userId: req.query.userId as string
-          }
-        });
-        return res.status(200).json(pdfs);
+        userId = req.query.userId as string;
       }
 
-      // Si c'est un utilisateur normal, il ne voit que ses PDFs
+      // Dans tous les cas, on filtre par l'userId approprié
       const pdfs = await prisma.pdf.findMany({
         where: {
-          userId: session.user.id
+          userId: userId
         }
       });
+
       return res.status(200).json(pdfs);
     } catch (error) {
       console.error('Erreur lors de la récupération des PDFs:', error);
@@ -82,12 +80,12 @@ export default async function handler(
       const title = fields.title?.[0] || pdfFile.originalFilename;
       const description = fields.description?.[0];
       
-      // Utiliser l'ID de l'utilisateur cible (pour les admins) ou l'ID de l'utilisateur connecté
-      const targetUserId = req.query.userId as string || session.user.id;
-
-      // Vérifier les permissions
-      if (session.user.role !== 'ADMIN' && targetUserId !== session.user.id) {
-        return res.status(403).json({ error: 'Non autorisé' });
+      // Déterminer l'userId cible
+      let targetUserId = session.user.id;
+      
+      // Si c'est un admin et qu'il spécifie un userId
+      if (session.user.role === 'ADMIN' && fields.userId?.[0]) {
+        targetUserId = fields.userId[0];
       }
 
       const pdf = await prisma.pdf.create({
