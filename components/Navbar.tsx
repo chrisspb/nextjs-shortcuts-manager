@@ -13,12 +13,6 @@ const Navbar = () => {
           </Link>
           
           <div className="flex items-center space-x-4">
-            {session?.user.role === 'ADMIN' && (
-              <Link href="/admin" className="text-gray-700 hover:text-gray-900">
-                Administration
-              </Link>
-            )}
-            
             <button
               onClick={() => signOut()}
               className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
