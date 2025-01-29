@@ -8,13 +8,18 @@ interface Pdf {
   description?: string;
 }
 
-export const usePdfs = () => {
+export const usePdfs = (userId?: string) => {
   const [pdfs, setPdfs] = useState<Pdf[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPdfs = async () => {
     try {
-      const response = await fetch('/api/pdfs');
+      // Si un userId est fourni, on l'ajoute comme query parameter
+      const url = userId 
+        ? `/api/pdfs?userId=${userId}`
+        : '/api/pdfs';
+      
+      const response = await fetch(url);
       if (!response.ok) throw new Error('Erreur lors du chargement des PDFs');
       const data = await response.json();
       setPdfs(data);
@@ -28,18 +33,23 @@ export const usePdfs = () => {
 
   const addPdf = async (formData: FormData) => {
     try {
+      // Si un userId est fourni, on l'ajoute au FormData
+      if (userId) {
+        formData.append('userId', userId);
+      }
+
       const response = await fetch('/api/pdfs', {
         method: 'POST',
         body: formData,
       });
       
-      if (!response.ok) throw new Error('Erreur lors de l\'ajout du PDF');
+      if (!response.ok) throw new Error('Erreur lors de l\\'ajout du PDF');
       
       const newPdf = await response.json();
       setPdfs([...pdfs, newPdf]);
       toast.success('PDF ajouté avec succès');
     } catch (error) {
-      toast.error('Impossible d\'ajouter le PDF');
+      toast.error('Impossible d\\'ajouter le PDF');
       console.error(error);
     }
   };
@@ -62,7 +72,7 @@ export const usePdfs = () => {
 
   useEffect(() => {
     fetchPdfs();
-  }, []);
+  }, [userId]); // Refetch when userId changes
 
   return {
     pdfs,
