@@ -2,6 +2,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Layout from '@/components/Layout';
+import InviteUserModal from '@/components/InviteUserModal';
 
 interface User {
   id: string;
@@ -13,6 +14,7 @@ export default function SelectUser() {
   const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -42,7 +44,6 @@ export default function SelectUser() {
   }, [session]);
 
   const handleUserSelect = (userId: string) => {
-    // Stocker l'ID de l'utilisateur sélectionné dans la session ou localStorage
     localStorage.setItem('selectedUserId', userId);
     router.push('/admin/dashboard');
   };
@@ -60,7 +61,15 @@ export default function SelectUser() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-8 px-4">
-        <h1 className="text-2xl font-bold mb-6">Sélectionner un utilisateur à administrer</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Sélectionner un utilisateur à administrer</h1>
+          <button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+          >
+            Inviter un utilisateur
+          </button>
+        </div>
         
         <div className="grid gap-4">
           <div 
@@ -82,6 +91,25 @@ export default function SelectUser() {
             </div>
           ))}
         </div>
+
+        <InviteUserModal 
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          onSuccess={() => {
+            // Rafraîchir la liste des utilisateurs après une invitation réussie
+            const fetchUsers = async () => {
+              try {
+                const response = await fetch('/api/users/managed');
+                if (!response.ok) throw new Error('Erreur lors du chargement des utilisateurs');
+                const data = await response.json();
+                setUsers(data);
+              } catch (error) {
+                console.error('Erreur:', error);
+              }
+            };
+            fetchUsers();
+          }}
+        />
       </div>
     </Layout>
   );
