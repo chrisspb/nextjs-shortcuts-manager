@@ -27,16 +27,21 @@ export default function AdminDashboard() {
   
   const userId = typeof window !== 'undefined' ? localStorage.getItem('selectedUserId') : null;
   
-  const { shortcuts, loading: shortcutsLoading, addShortcut, updateShortcut, deleteShortcut } = useShortcuts(userId || undefined);
-  const { pdfs, loading: pdfsLoading, addPdf, deletePdf } = usePdfs(userId || undefined);
-
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
-    } else if (session?.user.role !== 'ADMIN') {
-      router.push('/dashboard');
+    } else if (status === 'authenticated') {
+      if (session.user.role !== 'ADMIN') {
+        router.push('/dashboard');
+      } else if (!userId) {
+        // Si pas d'utilisateur sélectionné, rediriger vers la page de sélection
+        router.push('/admin/select-user');
+      }
     }
-  }, [status, session, router]);
+  }, [status, session, router, userId]);
+
+  const { shortcuts, loading: shortcutsLoading, addShortcut, updateShortcut, deleteShortcut } = useShortcuts(userId || undefined);
+  const { pdfs, loading: pdfsLoading, addPdf, deletePdf } = usePdfs(userId || undefined);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -53,8 +58,10 @@ export default function AdminDashboard() {
       }
     };
 
-    fetchUserInfo();
-  }, [userId]);
+    if (session?.user.role === 'ADMIN' && userId) {
+      fetchUserInfo();
+    }
+  }, [userId, session]);
 
   const handleShortcutSubmit = async (data: Omit<Shortcut, 'id'>) => {
     try {
@@ -85,28 +92,6 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleDeleteShortcut = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce raccourci ?')) {
-      try {
-        await deleteShortcut(id);
-        toast.success('Raccourci supprimé avec succès');
-      } catch (error) {
-        toast.error('Erreur lors de la suppression');
-      }
-    }
-  };
-
-  const handleDeletePdf = async (id: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer ce PDF ?')) {
-      try {
-        await deletePdf(id);
-        toast.success('PDF supprimé avec succès');
-      } catch (error) {
-        toast.error('Erreur lors de la suppression');
-      }
-    }
-  };
-
   if (status === 'loading' || shortcutsLoading || pdfsLoading) {
     return (
       <Layout>
@@ -115,6 +100,10 @@ export default function AdminDashboard() {
         </div>
       </Layout>
     );
+  }
+
+  if (!session || session.user.role !== 'ADMIN' || !userId) {
+    return null;
   }
 
   return (
@@ -162,7 +151,11 @@ export default function AdminDashboard() {
                       setSelectedShortcut(shortcut);
                       setIsShortcutModalOpen(true);
                     }}
-                    onDelete={() => handleDeleteShortcut(shortcut.id)}
+                    onDelete={() => {
+                      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce raccourci ?')) {
+                        deleteShortcut(shortcut.id);
+                      }
+                    }}
                   />
                 ))
               )}
@@ -189,7 +182,11 @@ export default function AdminDashboard() {
                     key={pdf.id}
                     {...pdf}
                     canEdit
-                    onDelete={() => handleDeletePdf(pdf.id)}
+                    onDelete={() => {
+                      if (window.confirm('Êtes-vous sûr de vouloir supprimer ce PDF ?')) {
+                        deletePdf(pdf.id);
+                      }
+                    }}
                   />
                 ))
               )}
