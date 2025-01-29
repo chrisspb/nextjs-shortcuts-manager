@@ -11,12 +11,19 @@ export default function Home() {
       router.push('/auth/signin');
     } else if (status === 'authenticated') {
       if (session.user.role === 'ADMIN') {
-        router.push('/admin/select-user');
+        const selectedUserId = localStorage.getItem('selectedUserId');
+        // Si un utilisateur est déjà sélectionné, aller au dashboard admin
+        if (selectedUserId) {
+          router.push('/admin/dashboard');
+        } else {
+          // Sinon, aller à la page de sélection d'utilisateur
+          router.push('/admin/select-user');
+        }
       } else {
         router.push('/dashboard');
       }
     }
-  }, [status, router, session]);
+  }, [status, session, router]);
 
   if (status === 'loading') {
     return (
