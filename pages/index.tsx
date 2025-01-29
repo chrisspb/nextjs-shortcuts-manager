@@ -1,7 +1,7 @@
 import { useSession, signIn } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useRouter } from 'next/router';
-import Layout from '../components/Layout';
+import Layout from '../components/Layout.tsx';
 
 export default function Home() {
   const { data: session, status } = useSession();
