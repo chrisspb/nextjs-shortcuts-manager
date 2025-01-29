@@ -11,7 +11,7 @@ export default function Home() {
       router.push('/auth/signin');
     } else if (status === 'authenticated') {
       if (session.user.role === 'ADMIN') {
-        router.push('/admin');
+        router.push('/admin/select-user');
       } else {
         router.push('/dashboard');
       }
