@@ -16,61 +16,64 @@ export default function Dashboard() {
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
+    } else if (session?.user.role === 'ADMIN') {
+      // Si c'est un admin, rediriger vers la page de sélection d'utilisateur
+      router.push('/admin/select-user');
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   if (status === 'loading' || shortcutsLoading || pdfsLoading) {
     return (
       <Layout>
-        <div className="flex justify-center items-center h-screen">
+        <div className="flex justify-center items-center h-full">
           <div className="text-xl">Chargement...</div>
         </div>
       </Layout>
     );
   }
 
-  if (!session) {
+  if (!session || session.user.role === 'ADMIN') {
     return null;
   }
 
   return (
     <Layout>
-      <div className="space-y-8">
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Mes raccourcis</h2>
-          {shortcuts.length === 0 ? (
-            <p className="text-gray-600">Aucun raccourci disponible.</p>
-          ) : (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="space-y-8">
+          <section>
+            <h2 className="text-xl font-bold mb-4">Mes raccourcis</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {shortcuts.map((shortcut) => (
-                <ShortcutCard
-                  key={shortcut.id}
-                  title={shortcut.title}
-                  url={shortcut.url}
-                  description={shortcut.description}
-                />
-              ))}
+              {shortcuts.length === 0 ? (
+                <p className="text-gray-500">Aucun raccourci disponible</p>
+              ) : (
+                shortcuts.map((shortcut) => (
+                  <ShortcutCard
+                    key={shortcut.id}
+                    {...shortcut}
+                    canEdit={false}
+                  />
+                ))
+              )}
             </div>
-          )}
-        </section>
+          </section>
 
-        <section>
-          <h2 className="text-2xl font-bold mb-4">Mes PDFs</h2>
-          {pdfs.length === 0 ? (
-            <p className="text-gray-600">Aucun PDF disponible.</p>
-          ) : (
+          <section>
+            <h2 className="text-xl font-bold mb-4">Mes PDFs</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {pdfs.map((pdf) => (
-                <PdfCard
-                  key={pdf.id}
-                  title={pdf.title}
-                  url={pdf.url}
-                  description={pdf.description}
-                />
-              ))}
+              {pdfs.length === 0 ? (
+                <p className="text-gray-500">Aucun PDF disponible</p>
+              ) : (
+                pdfs.map((pdf) => (
+                  <PdfCard
+                    key={pdf.id}
+                    {...pdf}
+                    canEdit={false}
+                  />
+                ))
+              )}
             </div>
-          )}
-        </section>
+          </section>
+        </div>
       </div>
     </Layout>
   );
