@@ -7,13 +7,17 @@ export default function SignIn() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const router = useRouter();
-  const { status } = useSession();
+  const { data: session, status } = useSession();
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/dashboard');
+      if (session.user.role === 'ADMIN') {
+        router.replace('/admin/select-user');
+      } else {
+        router.replace('/dashboard');
+      }
     }
-  }, [status, router]);
+  }, [status, session, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,8 +31,6 @@ export default function SignIn() {
 
     if (result?.error) {
       setError('Email ou mot de passe incorrect');
-    } else {
-      router.replace('/dashboard');
     }
   };
 
