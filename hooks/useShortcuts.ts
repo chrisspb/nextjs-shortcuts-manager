@@ -20,11 +20,11 @@ export const useShortcuts = (userId?: string) => {
         : '/api/shortcuts';
       
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Erreur lors du chargement des raccourcis');
+      if (!response.ok) throw new Error("Erreur lors du chargement des raccourcis");
       const data = await response.json();
       setShortcuts(data);
     } catch (error) {
-      toast.error('Impossible de charger les raccourcis');
+      toast.error("Impossible de charger les raccourcis");
       console.error(error);
     } finally {
       setLoading(false);
@@ -42,13 +42,13 @@ export const useShortcuts = (userId?: string) => {
         }),
       });
       
-      if (!response.ok) throw new Error('Erreur lors de l\\'ajout du raccourci');
+      if (!response.ok) throw new Error("Erreur lors de l'ajout du raccourci");
       
       const newShortcut = await response.json();
       setShortcuts([...shortcuts, newShortcut]);
-      toast.success('Raccourci ajouté avec succès');
+      toast.success("Raccourci ajouté avec succès");
     } catch (error) {
-      toast.error('Impossible d\\'ajouter le raccourci');
+      toast.error("Impossible d'ajouter le raccourci");
       console.error(error);
     }
   };
@@ -61,13 +61,13 @@ export const useShortcuts = (userId?: string) => {
         body: JSON.stringify(shortcutData),
       });
       
-      if (!response.ok) throw new Error('Erreur lors de la modification du raccourci');
+      if (!response.ok) throw new Error("Erreur lors de la modification du raccourci");
       
       const updatedShortcut = await response.json();
       setShortcuts(shortcuts.map(s => s.id === id ? updatedShortcut : s));
-      toast.success('Raccourci modifié avec succès');
+      toast.success("Raccourci modifié avec succès");
     } catch (error) {
-      toast.error('Impossible de modifier le raccourci');
+      toast.error("Impossible de modifier le raccourci");
       console.error(error);
     }
   };
@@ -78,12 +78,12 @@ export const useShortcuts = (userId?: string) => {
         method: 'DELETE',
       });
       
-      if (!response.ok) throw new Error('Erreur lors de la suppression du raccourci');
+      if (!response.ok) throw new Error("Erreur lors de la suppression du raccourci");
       
       setShortcuts(shortcuts.filter(s => s.id !== id));
-      toast.success('Raccourci supprimé avec succès');
+      toast.success("Raccourci supprimé avec succès");
     } catch (error) {
-      toast.error('Impossible de supprimer le raccourci');
+      toast.error("Impossible de supprimer le raccourci");
       console.error(error);
     }
   };
