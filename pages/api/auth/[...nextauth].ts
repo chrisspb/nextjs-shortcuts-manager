@@ -1,4 +1,5 @@
-import { NextAuthOptions } from 'next-auth';
+import { NextApiHandler } from 'next';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
@@ -70,4 +71,5 @@ export const authOptions: NextAuthOptions = {
   debug: process.env.NODE_ENV === 'development',
 };
 
-export default authOptions;
+const authHandler: NextApiHandler = NextAuth(authOptions);
+export default authHandler;
