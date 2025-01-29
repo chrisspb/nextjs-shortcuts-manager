@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSession } from 'next-auth/react';
-import Navbar from './Navbar.tsx';
+import Navbar from '@/components/Navbar';
 
 interface LayoutProps {
   children: React.ReactNode;
