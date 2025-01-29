@@ -20,11 +20,11 @@ export const usePdfs = (userId?: string) => {
         : '/api/pdfs';
       
       const response = await fetch(url);
-      if (!response.ok) throw new Error('Erreur lors du chargement des PDFs');
+      if (!response.ok) throw new Error("Erreur lors du chargement des PDFs");
       const data = await response.json();
       setPdfs(data);
     } catch (error) {
-      toast.error('Impossible de charger les PDFs');
+      toast.error("Impossible de charger les PDFs");
       console.error(error);
     } finally {
       setLoading(false);
@@ -43,13 +43,13 @@ export const usePdfs = (userId?: string) => {
         body: formData,
       });
       
-      if (!response.ok) throw new Error('Erreur lors de l\\'ajout du PDF');
+      if (!response.ok) throw new Error("Erreur lors de l'ajout du PDF");
       
       const newPdf = await response.json();
       setPdfs([...pdfs, newPdf]);
-      toast.success('PDF ajouté avec succès');
+      toast.success("PDF ajouté avec succès");
     } catch (error) {
-      toast.error('Impossible d\\'ajouter le PDF');
+      toast.error("Impossible d'ajouter le PDF");
       console.error(error);
     }
   };
@@ -60,12 +60,12 @@ export const usePdfs = (userId?: string) => {
         method: 'DELETE',
       });
       
-      if (!response.ok) throw new Error('Erreur lors de la suppression du PDF');
+      if (!response.ok) throw new Error("Erreur lors de la suppression du PDF");
       
       setPdfs(pdfs.filter(p => p.id !== id));
-      toast.success('PDF supprimé avec succès');
+      toast.success("PDF supprimé avec succès");
     } catch (error) {
-      toast.error('Impossible de supprimer le PDF');
+      toast.error("Impossible de supprimer le PDF");
       console.error(error);
     }
   };
