@@ -2,7 +2,6 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useTranslation } from '../i18n/client';
-import LanguageSelector from './LanguageSelector';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { data: session } = useSession();
@@ -21,7 +20,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             {/* Navigation links */}
             <div className="hidden md:block">
               <div className="flex items-center space-x-4">
-                <LanguageSelector />
                 {session && (
                   <>
                     <span className="text-gray-600">

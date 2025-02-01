@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 
-interface Shortcut {
+export interface Shortcut {
   id: string;
   title: string;
   url: string;

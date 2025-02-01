@@ -4,7 +4,7 @@ import { toast } from 'react-hot-toast';
 import Layout from '../../components/Layout';
 import ShortcutCard from '../../components/ShortcutCard';
 import PdfCard from '../../components/PdfCard';
-import { useShortcuts } from '../../hooks/useShortcuts';
+import { useShortcuts, Shortcut } from '../../hooks/useShortcuts';
 import { usePdfs } from '../../hooks/usePdfs';
 
 export default function AdminDashboard() {
@@ -12,7 +12,7 @@ export default function AdminDashboard() {
   const { shortcuts, loading: shortcutsLoading, addShortcut, updateShortcut, deleteShortcut } = useShortcuts();
   const { pdfs, loading: pdfsLoading, addPdf, deletePdf } = usePdfs();
   const [isShortcutModalOpen, setIsShortcutModalOpen] = useState(false);
-  const [selectedShortcut, setSelectedShortcut] = useState(null);
+  const [selectedShortcut, setSelectedShortcut] = useState<Shortcut | null>(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   if (!session || session.user.role !== 'ADMIN') {
