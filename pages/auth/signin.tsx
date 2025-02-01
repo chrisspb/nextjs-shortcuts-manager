@@ -1,5 +1,5 @@
-import { signIn } from 'next-auth/react';
-import { useState } from 'react';
+import { signIn, useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 export default function SignIn() {
@@ -8,20 +8,33 @@ export default function SignIn() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/');
+    }
+  }, [status, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    });
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      });
 
-    if (result?.error) {
-      setError('Email ou mot de passe incorrect');
+      if (result?.error) {
+        setError('Email ou mot de passe incorrect');
+        setIsLoading(false);
+      }
+      // Si pas d'erreur, la redirection sera gérée par le useEffect
+    } catch (error) {
+      setError('Une erreur est survenue');
       setIsLoading(false);
     }
   };
