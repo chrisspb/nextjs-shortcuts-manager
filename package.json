@@ -14,7 +14,7 @@
     "formidable": "^3.5.1",
     "next": "14.0.4",
     "next-auth": "^4.24.5",
-    "next-i18next": "^15.4.1",
+    "next-i18next": "^15.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1"
