@@ -8,23 +8,25 @@ interface Pdf {
   description?: string;
 }
 
-export const usePdfs = (userId?: string) => {
+export const usePdfs = (userId?: string | null) => {
   const [pdfs, setPdfs] = useState<Pdf[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchPdfs = async () => {
     try {
-      // Si un userId est fourni, on l'ajoute comme query parameter
-      const url = userId 
-        ? `/api/pdfs?userId=${userId}`
-        : '/api/pdfs';
-      
+      // Si userId est null, on ne fait pas de requête
+      if (userId === null) {
+        setPdfs([]);
+        return;
+      }
+
+      const url = userId ? `/api/pdfs?userId=${userId}` : '/api/pdfs';
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Erreur lors du chargement des PDFs");
+      if (!response.ok) throw new Error('Erreur lors du chargement des PDFs');
       const data = await response.json();
       setPdfs(data);
     } catch (error) {
-      toast.error("Impossible de charger les PDFs");
+      toast.error('Impossible de charger les PDFs');
       console.error(error);
     } finally {
       setLoading(false);
@@ -33,23 +35,20 @@ export const usePdfs = (userId?: string) => {
 
   const addPdf = async (formData: FormData) => {
     try {
-      // Si un userId est fourni, on l'ajoute au FormData
       if (userId) {
         formData.append('userId', userId);
       }
-
       const response = await fetch('/api/pdfs', {
         method: 'POST',
         body: formData,
       });
       
-      if (!response.ok) throw new Error("Erreur lors de l'ajout du PDF");
-      
+      if (!response.ok) throw new Error('Erreur lors de l\'ajout');
       const newPdf = await response.json();
       setPdfs([...pdfs, newPdf]);
-      toast.success("PDF ajouté avec succès");
+      toast.success('PDF ajouté avec succès');
     } catch (error) {
-      toast.error("Impossible d'ajouter le PDF");
+      toast.error('Impossible d\'ajouter le PDF');
       console.error(error);
     }
   };
@@ -60,12 +59,11 @@ export const usePdfs = (userId?: string) => {
         method: 'DELETE',
       });
       
-      if (!response.ok) throw new Error("Erreur lors de la suppression du PDF");
-      
+      if (!response.ok) throw new Error('Erreur lors de la suppression');
       setPdfs(pdfs.filter(p => p.id !== id));
-      toast.success("PDF supprimé avec succès");
+      toast.success('PDF supprimé avec succès');
     } catch (error) {
-      toast.error("Impossible de supprimer le PDF");
+      toast.error('Impossible de supprimer le PDF');
       console.error(error);
     }
   };
