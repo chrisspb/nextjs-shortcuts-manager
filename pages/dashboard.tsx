@@ -10,19 +10,20 @@ import PdfCard from '@/components/PdfCard';
 export default function Dashboard() {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const { shortcuts, loading: shortcutsLoading } = useShortcuts();
-  const { pdfs, loading: pdfsLoading } = usePdfs();
+
+  // Ne charger les données que si l'utilisateur est authentifié
+  const { shortcuts, loading: shortcutsLoading } = useShortcuts(status === 'authenticated' ? undefined : null);
+  const { pdfs, loading: pdfsLoading } = usePdfs(status === 'authenticated' ? undefined : null);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin');
     } else if (session?.user.role === 'ADMIN') {
-      // Si c'est un admin, rediriger vers la page de sélection d'utilisateur
       router.push('/admin/select-user');
     }
   }, [status, session, router]);
 
-  if (status === 'loading' || shortcutsLoading || pdfsLoading) {
+  if (status === 'loading' || status === 'unauthenticated') {
     return (
       <Layout>
         <div className="flex justify-center items-center h-full">
