@@ -52,13 +52,15 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      if (session?.user) {
+      if (session?.user && token?.sub) {
         session.user.id = token.sub;
         const user = await prisma.user.findUnique({
           where: { id: token.sub }
         });
-        session.user.role = user?.role;
-        session.user.managedBy = user?.managedBy;
+        if (user) {
+          session.user.role = user.role;
+          session.user.managedBy = user.managedBy;
+        }
       }
       return session;
     }
