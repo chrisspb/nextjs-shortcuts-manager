@@ -1,3 +1,5 @@
+// This is your Prisma schema file
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,42 +10,15 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(cuid())
-  email     String    @unique
+  id        String   @id @default(cuid())
+  email     String   @unique
   password  String
-  role      Role      @default(USER)
-  managedBy String?
-  manager   User?     @relation("UserManagement", fields: [managedBy], references: [id])
-  managing  User[]    @relation("UserManagement")
-  shortcuts Shortcut[]
-  pdfs      Pdf[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-}
-
-model Shortcut {
-  id          String   @id @default(cuid())
-  title       String
-  url         String
-  description String?
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Pdf {
-  id          String   @id @default(cuid())
-  title       String
-  url         String
-  description String?
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
-  ADMIN
   USER
+  ADMIN
 }
