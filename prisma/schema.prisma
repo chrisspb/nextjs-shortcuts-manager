@@ -8,15 +8,12 @@ datasource db {
 }
 
 model User {
-  id         String    @id @default(cuid())
-  email      String    @unique
-  password   String
-  role       Role      @default(USER)
-  managedBy  String?
-  manager    User?     @relation("UserManagement", fields: [managedBy], references: [id])
-  users      User[]    @relation("UserManagement")
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
